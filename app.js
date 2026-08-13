@@ -73,18 +73,36 @@ function imageUrl(word) {
   return `content/images/${word.id}.png`;
 }
 
+// 単一のAudio要素を使い回す。最初のタップ時に無音を1回鳴らして「解錠」しておくと、
+// iOS/Silkでもタップ直後以外のタイミング（出題時の自動再生など）で音を出せる
+const SILENT_WAV = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+const player = new Audio();
+let audioUnlocked = false;
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  player.src = SILENT_WAV;
+  player.play().catch(() => {});
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx.resume();
+  } catch (e) { /* 効果音なしで続行 */ }
+}
+document.addEventListener("pointerdown", unlockAudio, { capture: true });
+document.addEventListener("touchstart", unlockAudio, { capture: true });
+
 function playAudio(id) {
-  const tryPlay = (url, fallback) => {
-    const a = new Audio(url);
-    a.play().catch(() => {});
-    a.onerror = () => {
-      if (fallback) tryPlay(fallback, null);
+  const play = (url, fallback) => {
+    player.onerror = () => {
+      if (fallback) play(fallback, null);
       else delete audioUrlCache[id];
     };
-    a.oncanplaythrough = () => { audioUrlCache[id] = url; };
+    player.src = url;
+    player.play().then(() => { audioUrlCache[id] = url; }).catch(() => {});
   };
-  if (audioUrlCache[id]) tryPlay(audioUrlCache[id], null);
-  else tryPlay(`content/audio/${id}.mp3`, `content/audio/${id}.m4a`);
+  if (audioUrlCache[id]) play(audioUrlCache[id], null);
+  else play(`content/audio/${id}.mp3`, `content/audio/${id}.m4a`);
 }
 
 // ---------- 正解演出 ----------
@@ -108,6 +126,24 @@ function playChime() {
       osc.start(now + delay);
       osc.stop(now + delay + 0.55);
     });
+  } catch (e) { /* 音が出なくても続行 */ }
+}
+
+function playBuzzer() {
+  // 不正解の「ブッ」（低いノコギリ波を短く）
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.value = 110;
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(0.25, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.4);
   } catch (e) { /* 音が出なくても続行 */ }
 }
 
@@ -315,7 +351,7 @@ function renderQuiz(setIndex) {
       const btn = el(`<button class="prompt-audio">🔊<span>きく</span></button>`);
       btn.onclick = () => playAudio(q.word.id);
       promptArea.appendChild(btn);
-      setTimeout(() => playAudio(q.word.id), 300); // 自動再生（ブロックされたらボタンで）
+      playAudio(q.word.id); // 出題と同時に1回再生（きくボタンは聞き直し用）
     }
 
     // --- 選択肢: どの形式でも「タップで選択 → きめた！で確定」 ---
@@ -371,6 +407,7 @@ function renderQuiz(setIndex) {
         p.wrong++;
         delete p.passed[q.mode.key]; // 間違えたらその方式はやり直し
         btn.classList.add("wrong");
+        playBuzzer();
         // 正解の選択肢を光らせる
         [...choicesBox.children].forEach((b, i2) => {
           if (q.choices[i2].id === q.word.id) b.classList.add("correct");
@@ -393,8 +430,8 @@ function renderQuiz(setIndex) {
         <button class="next">つぎへ ▶</button>
       </div>`);
       fb.querySelector(".next").onclick = () => { qi++; showQuestion(); };
-      // 正解の音を必ず聞かせて定着させる（正解時はチャイムの後に）
-      setTimeout(() => playAudio(q.word.id), correct ? 700 : 0);
+      // 正解の音を必ず聞かせて定着させる（効果音が鳴り終わってから）
+      setTimeout(() => playAudio(q.word.id), correct ? 700 : 450);
       confirmArea.replaceChildren(fb);
       if (isMastered(q.word)) {
         fb.querySelector(".fb-mark").insertAdjacentHTML("beforeend",
