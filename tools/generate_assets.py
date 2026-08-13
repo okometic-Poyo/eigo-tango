@@ -28,21 +28,55 @@ RATE = "150"         # 少しゆっくりめ
 
 # 単語ID → 仮イラスト用の絵文字（複数指定可）
 EMOJI = {
-    "apple": "🍎",
-    "milk": "🥛",
-    "egg": "🥚",
-    "bread": "🍞",
+    "apple": "🍎", "milk": "🥛", "egg": "🥚", "bread": "🍞",
     "i-like-apples": "🙂💕🍎",
-    "dog": "🐶",
-    "cat": "🐱",
-    "elephant": "🐘",
-    "monkey": "🐵",
+    "dog": "🐶", "cat": "🐱", "elephant": "🐘", "monkey": "🐵",
     "i-see-a-big-elephant": "👀🐘",
-    "book": "📖",
-    "pen": "🖊️",
-    "pencil": "✏️",
-    "bag": "🎒",
+    "book": "📖", "pen": "🖊️", "pencil": "✏️", "bag": "🎒",
     "this-is-my-book": "🙋📖",
+    "banana": "🍌", "orange": "🍊", "grape": "🍇", "peach": "🍑", "strawberry": "🍓",
+    "i-want-a-banana": "🙏🍌",
+    "red": "❤️", "blue": "💙", "yellow": "💛", "green": "💚", "pink": "💗",
+    "what-color-is-it": "❓🎨",
+    "one": "⭐", "two": "⭐⭐", "three": "⭐⭐⭐",
+    "four": "⭐⭐\n⭐⭐", "five": "⭐⭐⭐\n⭐⭐",
+    "how-many-apples": "🍎❓",
+    "six": "⭐⭐⭐\n⭐⭐⭐", "seven": "⭐⭐⭐⭐\n⭐⭐⭐",
+    "eight": "⭐⭐⭐⭐\n⭐⭐⭐⭐", "nine": "⭐⭐⭐\n⭐⭐⭐\n⭐⭐⭐",
+    "ten": "⭐⭐⭐⭐⭐\n⭐⭐⭐⭐⭐",
+    "how-old-are-you": "🎂❓",
+    "father": "👨", "mother": "👩", "brother": "👦", "sister": "👧", "baby": "👶",
+    "she-is-my-mother": "👧💕👩",
+    "eye": "👁️", "ear": "👂", "nose": "👃", "mouth": "👄", "hand": "✋",
+    "touch-your-nose": "👉👃",
+    "bird": "🐦", "rabbit": "🐰", "bear": "🐻", "lion": "🦁", "pig": "🐷",
+    "a-rabbit-can-jump": "🐰⬆️",
+    "sun": "☀️", "rain": "🌧️", "snow": "❄️", "cloud": "☁️", "umbrella": "☂️",
+    "it-is-sunny-today": "☀️😊",
+    "car": "🚗", "bus": "🚌", "train": "🚃", "bike": "🚲", "boat": "⛵",
+    "i-go-by-bus": "🙂🚌",
+    "table": "🍽️", "chair": "🪑", "bed": "🛏️", "door": "🚪", "window": "🪟",
+    "the-cat-is-under-the-table": "🐱⬇️🍽️",
+    "hat": "👒", "cap": "🧢", "shirt": "👕", "shoes": "👟", "socks": "🧦",
+    "i-wear-a-new-cap": "🙂🧢",
+    "soccer": "⚽", "baseball": "⚾", "tennis": "🎾", "basketball": "🏀",
+    "lets-play-soccer": "⚽😆",
+    "tree": "🌳", "flower": "🌼", "mountain": "⛰️", "river": "🏞️", "sea": "🌊",
+    "look-at-the-mountain": "👀⛰️",
+    "school": "🏫", "park": "🛝", "station": "🚉", "shop": "🏪", "zoo": "🦓",
+    "where-is-the-station": "❓🚉",
+    "rice": "🍚", "fish": "🐟", "meat": "🍖", "soup": "🍲", "cake": "🍰",
+    "i-am-hungry": "😋🍽️",
+    "juice": "🧃", "water": "💧", "tea": "🍵", "ice-cream": "🍦", "candy": "🍬",
+    "juice-please": "🧃🙏",
+    "morning": "🌅", "night": "🌃", "breakfast": "🍳", "lunch": "🍱", "dinner": "🍽️",
+    "good-morning": "🌅👋", "good-night": "🌙😴",
+    "spring": "🌸", "summer": "🌻", "fall": "🍁", "winter": "⛄", "star": "⭐",
+    "it-is-hot-in-summer": "🥵☀️",
+    "piano": "🎹", "guitar": "🎸", "music": "🎵", "song": "🎤", "drum": "🥁",
+    "i-play-the-piano": "🙂🎹",
+    "friend": "🧑‍🤝‍🧑", "teacher": "👩‍🏫",
+    "thank-you": "🙏😊", "what-is-your-name": "❓🙂",
 }
 
 BG_COLORS = [
@@ -65,10 +99,10 @@ def make_image(word_id: str, emoji: str, font) -> None:
     out = IMAGE_DIR / f"{word_id}.png"
     canvas = Image.new("RGBA", (512, 512), BG_COLORS[hash(word_id) % len(BG_COLORS)])
 
-    # 絵文字を透明キャンバスに描いてから、中央に拡大配置する
-    tmp = Image.new("RGBA", (1200, 400), (0, 0, 0, 0))
+    # 絵文字を透明キャンバスに描いてから、中央に拡大配置する（\n で複数行可）
+    tmp = Image.new("RGBA", (1400, 900), (0, 0, 0, 0))
     draw = ImageDraw.Draw(tmp)
-    draw.text((10, 10), emoji, font=font, embedded_color=True)
+    draw.multiline_text((10, 10), emoji, font=font, embedded_color=True, spacing=20)
     bbox = tmp.getbbox()
     if not bbox:
         raise RuntimeError(f"絵文字を描画できませんでした: {word_id}")

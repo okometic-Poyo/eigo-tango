@@ -17,6 +17,126 @@
       "title": "がっこう",
       "emoji": "🏫",
       "words": ["book", "pen", "pencil", "bag", "this", "is", "my", "this-is-my-book"]
+    },
+    {
+      "id": "set-04",
+      "title": "くだもの",
+      "emoji": "🍇",
+      "words": ["banana", "orange", "grape", "peach", "strawberry", "eat", "want", "i-want-a-banana"]
+    },
+    {
+      "id": "set-05",
+      "title": "いろ",
+      "emoji": "🎨",
+      "words": ["red", "blue", "yellow", "green", "pink", "what", "it", "what-color-is-it"]
+    },
+    {
+      "id": "set-06",
+      "title": "かず（1〜5）",
+      "emoji": "🖐",
+      "words": ["one", "two", "three", "four", "five", "how", "many", "how-many-apples"]
+    },
+    {
+      "id": "set-07",
+      "title": "かず（6〜10）",
+      "emoji": "🔟",
+      "words": ["six", "seven", "eight", "nine", "ten", "old", "you", "how-old-are-you"]
+    },
+    {
+      "id": "set-08",
+      "title": "かぞく",
+      "emoji": "👨‍👩‍👧‍👦",
+      "words": ["father", "mother", "brother", "sister", "baby", "he", "she", "she-is-my-mother"]
+    },
+    {
+      "id": "set-09",
+      "title": "かお と からだ",
+      "emoji": "😊",
+      "words": ["eye", "ear", "nose", "mouth", "hand", "touch", "your", "touch-your-nose"]
+    },
+    {
+      "id": "set-10",
+      "title": "どうぶつ いっぱい",
+      "emoji": "🦁",
+      "words": ["bird", "rabbit", "bear", "lion", "pig", "can", "jump", "a-rabbit-can-jump"]
+    },
+    {
+      "id": "set-11",
+      "title": "おてんき",
+      "emoji": "☀️",
+      "words": ["sun", "rain", "snow", "cloud", "umbrella", "sunny", "today", "it-is-sunny-today"]
+    },
+    {
+      "id": "set-12",
+      "title": "のりもの",
+      "emoji": "🚌",
+      "words": ["car", "bus", "train", "bike", "boat", "go", "by", "i-go-by-bus"]
+    },
+    {
+      "id": "set-13",
+      "title": "おうち",
+      "emoji": "🏠",
+      "words": ["table", "chair", "bed", "door", "window", "on", "under", "the-cat-is-under-the-table"]
+    },
+    {
+      "id": "set-14",
+      "title": "おようふく",
+      "emoji": "👕",
+      "words": ["hat", "cap", "shirt", "shoes", "socks", "wear", "new", "i-wear-a-new-cap"]
+    },
+    {
+      "id": "set-15",
+      "title": "スポーツ",
+      "emoji": "⚽",
+      "words": ["soccer", "baseball", "tennis", "basketball", "play", "swim", "run", "lets-play-soccer"]
+    },
+    {
+      "id": "set-16",
+      "title": "しぜん",
+      "emoji": "⛰",
+      "words": ["tree", "flower", "mountain", "river", "sea", "look", "at", "look-at-the-mountain"]
+    },
+    {
+      "id": "set-17",
+      "title": "まち",
+      "emoji": "🚉",
+      "words": ["school", "park", "station", "shop", "zoo", "where", "here", "where-is-the-station"]
+    },
+    {
+      "id": "set-18",
+      "title": "ごはん",
+      "emoji": "🍚",
+      "words": ["rice", "fish", "meat", "soup", "cake", "hungry", "am", "i-am-hungry"]
+    },
+    {
+      "id": "set-19",
+      "title": "のみもの と おやつ",
+      "emoji": "🧃",
+      "words": ["juice", "water", "tea", "ice-cream", "candy", "drink", "please", "juice-please"]
+    },
+    {
+      "id": "set-20",
+      "title": "いちにち",
+      "emoji": "🌙",
+      "words": ["morning", "night", "breakfast", "lunch", "dinner", "sleepy", "good-morning", "good-night"]
+    },
+    {
+      "id": "set-21",
+      "title": "きせつ",
+      "emoji": "🌸",
+      "words": ["spring", "summer", "fall", "winter", "star", "hot", "cold", "it-is-hot-in-summer"]
+    },
+    {
+      "id": "set-22",
+      "title": "おんがく",
+      "emoji": "🎵",
+      "words": ["piano", "guitar", "music", "song", "drum", "sing", "listen", "i-play-the-piano"]
+    },
+    {
+      "id": "set-23",
+      "title": "あいさつ",
+      "emoji": "👋",
+      "words": ["friend", "teacher", "hello", "goodbye", "yes", "no", "thank-you", "what-is-your-name"]
     }
   ]
 }
