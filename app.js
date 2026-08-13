@@ -371,9 +371,11 @@ function renderQuiz(setIndex) {
       }
       saveProgress();
 
+      // 機能語は日本語訳を出さない（英語→日本語変換のクセを防ぐ）
+      const showJa = q.word.ja && q.word.category !== "function-word";
       const fb = el(`<div class="feedback ${correct ? "ok" : "ng"}">
         <div class="fb-mark">${correct ? "⭕ せいかい！" : "❌ ざんねん"}</div>
-        <div class="fb-word">${escapeHtml(q.word.text)}${q.word.ja ? `　<span class="fb-ja">${escapeHtml(q.word.ja)}</span>` : ""}</div>
+        <div class="fb-word">${escapeHtml(q.word.text)}${showJa ? `　<span class="fb-ja">${escapeHtml(q.word.ja)}</span>` : ""}</div>
         <button class="next">つぎへ ▶</button>
       </div>`);
       fb.querySelector(".next").onclick = () => { qi++; showQuestion(); };
@@ -426,11 +428,12 @@ function renderList() {
       const w = WORD_MAP[id];
       if (!w) return;
       const mastered = isMastered(w);
+      const listJa = w.category !== "function-word" ? w.ja || "" : "";
       const row = el(`<div class="word-row ${mastered ? "mastered" : ""}">
         <span class="row-visual"></span>
         <span class="row-text">
           <span class="row-spell ${w.category === "sentence" ? "sentence" : ""}">${escapeHtml(w.text)}</span>
-          <span class="row-ja">${escapeHtml(w.ja || "")}</span>
+          <span class="row-ja">${escapeHtml(listJa)}</span>
         </span>
         <button class="row-play">🔊</button>
         <span class="row-badge">${mastered ? "🏅" : ""}</span>
