@@ -1,0 +1,22 @@
+{
+  "sets": [
+    {
+      "id": "set-01",
+      "title": "あさごはん",
+      "emoji": "🍳",
+      "words": ["apple", "milk", "egg", "bread", "i", "like", "and", "i-like-apples"]
+    },
+    {
+      "id": "set-02",
+      "title": "どうぶつえん",
+      "emoji": "🐘",
+      "words": ["dog", "cat", "elephant", "monkey", "a", "see", "big", "i-see-a-big-elephant"]
+    },
+    {
+      "id": "set-03",
+      "title": "がっこう",
+      "emoji": "🏫",
+      "words": ["book", "pen", "pencil", "bag", "this", "is", "my", "this-is-my-book"]
+    }
+  ]
+}

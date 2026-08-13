@@ -1,0 +1,30 @@
+{
+  "words": [
+    { "id": "apple",    "text": "apple",    "ja": "りんご",       "category": "noun",          "level": "eiken-jr-gold" },
+    { "id": "milk",     "text": "milk",     "ja": "ぎゅうにゅう", "category": "noun",          "level": "eiken-jr-gold" },
+    { "id": "egg",      "text": "egg",      "ja": "たまご",       "category": "noun",          "level": "eiken-jr-gold" },
+    { "id": "bread",    "text": "bread",    "ja": "パン",         "category": "noun",          "level": "eiken-jr-gold" },
+    { "id": "i",        "text": "I",        "ja": "わたし",       "category": "function-word", "level": "eiken-jr-gold" },
+    { "id": "like",     "text": "like",     "ja": "〜がすき",     "category": "function-word", "level": "eiken-jr-gold" },
+    { "id": "and",      "text": "and",      "ja": "〜と〜",       "category": "function-word", "level": "eiken-jr-gold" },
+    { "id": "i-like-apples", "text": "I like apples.", "ja": "わたしはりんごがすき。", "category": "sentence", "level": "eiken-jr-gold" },
+
+    { "id": "dog",      "text": "dog",      "ja": "いぬ",         "category": "noun",          "level": "eiken-jr-gold" },
+    { "id": "cat",      "text": "cat",      "ja": "ねこ",         "category": "noun",          "level": "eiken-jr-gold" },
+    { "id": "elephant", "text": "elephant", "ja": "ぞう",         "category": "noun",          "level": "eiken-jr-gold" },
+    { "id": "monkey",   "text": "monkey",   "ja": "さる",         "category": "noun",          "level": "eiken-jr-gold" },
+    { "id": "a",        "text": "a",        "ja": "ひとつの",     "category": "function-word", "level": "eiken-jr-gold" },
+    { "id": "see",      "text": "see",      "ja": "みる",         "category": "function-word", "level": "eiken-jr-gold" },
+    { "id": "big",      "text": "big",      "ja": "おおきい",     "category": "function-word", "level": "eiken-jr-gold" },
+    { "id": "i-see-a-big-elephant", "text": "I see a big elephant.", "ja": "おおきいぞうがみえる。", "category": "sentence", "level": "eiken-jr-gold" },
+
+    { "id": "book",     "text": "book",     "ja": "ほん",         "category": "noun",          "level": "eiken-jr-gold" },
+    { "id": "pen",      "text": "pen",      "ja": "ペン",         "category": "noun",          "level": "eiken-jr-gold" },
+    { "id": "pencil",   "text": "pencil",   "ja": "えんぴつ",     "category": "noun",          "level": "eiken-jr-gold" },
+    { "id": "bag",      "text": "bag",      "ja": "かばん",       "category": "noun",          "level": "eiken-jr-gold" },
+    { "id": "this",     "text": "this",     "ja": "これ",         "category": "function-word", "level": "eiken-jr-gold" },
+    { "id": "is",       "text": "is",       "ja": "〜です",       "category": "function-word", "level": "eiken-jr-gold" },
+    { "id": "my",       "text": "my",       "ja": "わたしの",     "category": "function-word", "level": "eiken-jr-gold" },
+    { "id": "this-is-my-book", "text": "This is my book.", "ja": "これはわたしのほん。", "category": "sentence", "level": "eiken-jr-gold" }
+  ]
+}

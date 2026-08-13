@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import PIL; print\\('PIL OK'\\)\")",
+      "Bash(say -v '?')",
+      "Bash(python3 -c \"import PIL; print\\(PIL.__version__\\)\")",
+      "Bash(python3 tools/generate_assets.py)",
+      "Bash(say -v Samantha -r 150 -o /tmp/tango_test.aiff \"apple\")",
+      "Bash(afconvert /tmp/tango_test.aiff -f m4af -d aac -b 96000 /tmp/tango_test.m4a)",
+      "Bash(echo \"exit=$?\")",
+      "Read(//private/tmp/**)",
+      "Bash(afconvert /tmp/tango_test.aiff -f m4af -d aac /tmp/tango_test.m4a)",
+      "Read(//tmp/**)",
+      "Bash(afinfo /tmp/tango_test.m4a)",
+      "Bash(npm ls *)",
+      "Bash(mkdir -p /tmp/tango-e2e)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(node *)",
+      "Bash(lsof -ti:8642 -sTCP:LISTEN)",
+      "Bash(xargs -r kill)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git -c user.name=aya -c user.email=aya@example.com commit -qm '初版: フラッシュカード＆小テストアプリ（サンプル3セット24語） *)"
+    ]
+  }
+}

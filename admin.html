@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>かんりページ | えいごのたんご</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Hiragino Sans", sans-serif;
+  background: #f5f5f5;
+  color: #333;
+}
+.wrap { max-width: 560px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 20px; }
+h2 { font-size: 16px; margin: 24px 0 8px; border-left: 4px solid #ffb300; padding-left: 8px; }
+.card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+label { display: block; font-size: 13px; font-weight: bold; margin: 12px 0 4px; color: #666; }
+input[type=text], input[type=password], select {
+  width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px;
+}
+input[type=file] { width: 100%; font-size: 14px; padding: 8px 0; }
+button {
+  width: 100%; padding: 14px; font-size: 16px; font-weight: bold;
+  color: #fff; background: #ff8f00; border: none; border-radius: 10px; margin-top: 14px;
+}
+button:disabled { background: #ccc; }
+button.secondary { background: #78909c; }
+.msg { margin-top: 12px; padding: 10px; border-radius: 8px; font-size: 14px; white-space: pre-wrap; }
+.msg.ok { background: #e8f5e9; color: #2e7d32; }
+.msg.err { background: #ffebee; color: #c62828; }
+.msg.info { background: #e3f2fd; color: #1565c0; }
+.preview { margin-top: 10px; text-align: center; }
+.preview img { max-width: 160px; border-radius: 10px; border: 1px solid #ddd; }
+.note { font-size: 12px; color: #888; margin-top: 6px; }
+a { color: #1565c0; }
+.back { display: inline-block; margin-bottom: 10px; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">◀ アプリにもどる</a>
+  <h1>⚙️ かんりページ</h1>
+
+  <!-- ===== 設定 ===== -->
+  <div class="card" id="setup-card">
+    <h2 style="margin-top:0">接続設定（最初に1回だけ）</h2>
+    <label>GitHubユーザー名 / リポジトリ名（例: aya/tango-app）</label>
+    <input type="text" id="repo" placeholder="ユーザー名/リポジトリ名">
+    <label>アクセストークン（Fine-grained PAT）</label>
+    <input type="password" id="token" placeholder="github_pat_...">
+    <p class="note">トークンはこの端末のブラウザ内にのみ保存されます。作成方法はREADME参照。</p>
+    <button id="save-setup">設定を保存して接続テスト</button>
+    <div id="setup-msg"></div>
+  </div>
+
+  <!-- ===== 素材の差し替え ===== -->
+  <div class="card">
+    <h2 style="margin-top:0">素材の差し替え／アップロード</h2>
+    <label>単語を選ぶ</label>
+    <select id="word-select"><option>（接続設定をしてください）</option></select>
+    <label>種類</label>
+    <select id="kind-select">
+      <option value="image">イラスト（png/jpg → 512px正方形PNGに自動変換）</option>
+      <option value="audio">音源（mp3ファイル）</option>
+    </select>
+    <label>ファイルを選ぶ</label>
+    <input type="file" id="file-input">
+    <div class="preview" id="preview"></div>
+    <button id="upload-btn" disabled>この単語の素材を差し替える</button>
+    <div id="upload-msg"></div>
+  </div>
+
+  <!-- ===== 単語の追加 ===== -->
+  <div class="card">
+    <h2 style="margin-top:0">新しい単語を追加</h2>
+    <label>英語（例: banana ／ 文章なら I like dogs.）</label>
+    <input type="text" id="new-text" placeholder="banana">
+    <label>日本語の意味（例: バナナ）</label>
+    <input type="text" id="new-ja" placeholder="バナナ">
+    <label>分類</label>
+    <select id="new-category">
+      <option value="noun">名詞</option>
+      <option value="function-word">機能語</option>
+      <option value="sentence">文章</option>
+    </select>
+    <label>レベル</label>
+    <select id="new-level">
+      <option value="eiken-jr-gold">英検Jr.ゴールド</option>
+      <option value="eiken-5">英検5級</option>
+    </select>
+    <label>追加先のセット</label>
+    <select id="new-set"></select>
+    <p class="note">ID（ファイル名）は英語から自動で作られます（例: "I like dogs." → i-like-dogs）。追加後、上の「素材の差し替え」からイラストと音源をアップロードしてください。</p>
+    <button id="add-btn" disabled>単語を追加する</button>
+    <div id="add-msg"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const LS_REPO = "tango-admin-repo";
+const LS_TOKEN = "tango-admin-token";
+
+let repo = localStorage.getItem(LS_REPO) || "";
+let token = localStorage.getItem(LS_TOKEN) || "";
+let wordsDoc = null;   // words.json の中身
+let setsDoc = null;    // sets.json の中身
+let wordsSha = null;   // GitHub上のwords.jsonのSHA（更新に必要）
+
+const $ = (id) => document.getElementById(id);
+
+function showMsg(id, text, cls) {
+  $(id).innerHTML = `<div class="msg ${cls}">${text}</div>`;
+}
+
+// ---------- GitHub API ----------
+
+function apiUrl(path) {
+  return `https://api.github.com/repos/${repo}/contents/${path}`;
+}
+
+async function ghGet(path) {
+  const res = await fetch(apiUrl(path), {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+  });
+  if (!res.ok) throw new Error(`GET ${path}: ${res.status} ${await res.text()}`);
+  return res.json();
+}
+
+async function ghGetSha(path) {
+  const res = await fetch(apiUrl(path), {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`GET ${path}: ${res.status}`);
+  return (await res.json()).sha;
+}
+
+async function ghPut(path, base64Content, message) {
+  const sha = await ghGetSha(path);
+  const body = { message, content: base64Content };
+  if (sha) body.sha = sha;
+  const res = await fetch(apiUrl(path), {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`PUT ${path}: ${res.status} ${await res.text()}`);
+  return res.json();
+}
+
+function b64encodeText(text) {
+  return btoa(String.fromCharCode(...new TextEncoder().encode(text)));
+}
+
+function b64encodeBytes(uint8) {
+  let bin = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < uint8.length; i += chunk) {
+    bin += String.fromCharCode(...uint8.subarray(i, i + chunk));
+  }
+  return btoa(bin);
+}
+
+// ---------- 初期化・接続 ----------
+
+async function connect() {
+  const wordsFile = await ghGet("content/words.json");
+  wordsSha = wordsFile.sha;
+  wordsDoc = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(wordsFile.content.replace(/\n/g, "")), (c) => c.charCodeAt(0))));
+  const setsFile = await ghGet("content/sets.json");
+  setsDoc = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(setsFile.content.replace(/\n/g, "")), (c) => c.charCodeAt(0))));
+  fillWordSelect();
+  fillSetSelect();
+  $("upload-btn").disabled = false;
+  $("add-btn").disabled = false;
+}
+
+function fillWordSelect() {
+  const sel = $("word-select");
+  sel.innerHTML = "";
+  wordsDoc.words.forEach((w) => {
+    const opt = document.createElement("option");
+    opt.value = w.id;
+    opt.textContent = `${w.text}（${w.ja || ""}） — ${w.id}`;
+    sel.appendChild(opt);
+  });
+}
+
+function fillSetSelect() {
+  const sel = $("new-set");
+  sel.innerHTML = "";
+  setsDoc.sets.forEach((s, i) => {
+    const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.textContent = `セット${i + 1}　${s.title}`;
+    sel.appendChild(opt);
+  });
+}
+
+$("save-setup").onclick = async () => {
+  repo = $("repo").value.trim();
+  token = $("token").value.trim();
+  if (!repo.includes("/") || !token) {
+    showMsg("setup-msg", "リポジトリ名（ユーザー名/リポジトリ名）とトークンを入力してください。", "err");
+    return;
+  }
+  showMsg("setup-msg", "接続中…", "info");
+  try {
+    localStorage.setItem(LS_REPO, repo);
+    localStorage.setItem(LS_TOKEN, token);
+    await connect();
+    showMsg("setup-msg", "✅ 接続できました！設定は保存済みです。", "ok");
+  } catch (e) {
+    showMsg("setup-msg", `接続できませんでした。リポジトリ名とトークンを確認してください。\n${e.message}`, "err");
+  }
+};
+
+// ---------- 画像の正方形PNG変換 ----------
+
+function fileToSquarePng(file, size = 512) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, size, size);
+      // 中央に収まるよう縮小（余白は白）
+      const scale = Math.min(size / img.width, size / img.height);
+      const w = img.width * scale, h = img.height * scale;
+      ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("変換失敗")), "image/png");
+    };
+    img.onerror = () => reject(new Error("画像を読み込めませんでした"));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// ---------- 素材アップロード ----------
+
+$("file-input").onchange = () => {
+  const f = $("file-input").files[0];
+  const pv = $("preview");
+  pv.innerHTML = "";
+  if (f && f.type.startsWith("image/")) {
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(f);
+    pv.appendChild(img);
+  } else if (f) {
+    pv.textContent = `🎵 ${f.name}`;
+  }
+};
+
+$("upload-btn").onclick = async () => {
+  const wordId = $("word-select").value;
+  const kind = $("kind-select").value;
+  const file = $("file-input").files[0];
+  if (!file) { showMsg("upload-msg", "ファイルを選んでください。", "err"); return; }
+
+  $("upload-btn").disabled = true;
+  showMsg("upload-msg", "アップロード中…", "info");
+  try {
+    let path, bytes;
+    if (kind === "image") {
+      if (!file.type.startsWith("image/")) throw new Error("画像ファイルを選んでください。");
+      const blob = await fileToSquarePng(file);
+      bytes = new Uint8Array(await blob.arrayBuffer());
+      path = `content/images/${wordId}.png`;
+    } else {
+      if (!/\.mp3$/i.test(file.name)) throw new Error("mp3ファイルを選んでください。");
+      bytes = new Uint8Array(await file.arrayBuffer());
+      path = `content/audio/${wordId}.mp3`;
+    }
+    await ghPut(path, b64encodeBytes(bytes), `素材更新: ${path}`);
+    showMsg("upload-msg", `✅ 差し替えました！\n${path}\n1分ほどでアプリに反映されます。`, "ok");
+  } catch (e) {
+    showMsg("upload-msg", `失敗しました。\n${e.message}`, "err");
+  } finally {
+    $("upload-btn").disabled = false;
+  }
+};
+
+// ---------- 単語の追加 ----------
+
+function makeId(text) {
+  return text.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
+$("add-btn").onclick = async () => {
+  const text = $("new-text").value.trim();
+  const ja = $("new-ja").value.trim();
+  const category = $("new-category").value;
+  const level = $("new-level").value;
+  const setId = $("new-set").value;
+  if (!text) { showMsg("add-msg", "英語を入力してください。", "err"); return; }
+  const id = makeId(text);
+  if (!id) { showMsg("add-msg", "IDを作れませんでした。英語の綴りを確認してください。", "err"); return; }
+  if (wordsDoc.words.some((w) => w.id === id)) {
+    showMsg("add-msg", `「${id}」はすでに登録されています。`, "err");
+    return;
+  }
+
+  $("add-btn").disabled = true;
+  showMsg("add-msg", "追加中…", "info");
+  try {
+    wordsDoc.words.push({ id, text, ja, category, level });
+    await ghPut("content/words.json", b64encodeText(JSON.stringify(wordsDoc, null, 2)), `単語追加: ${id}`);
+    const set = setsDoc.sets.find((s) => s.id === setId);
+    if (set && !set.words.includes(id)) {
+      set.words.push(id);
+      await ghPut("content/sets.json", b64encodeText(JSON.stringify(setsDoc, null, 2)), `セットに追加: ${id} → ${setId}`);
+    }
+    fillWordSelect();
+    $("word-select").value = id;
+    $("new-text").value = ""; $("new-ja").value = "";
+    showMsg("add-msg", `✅ 「${text}」を追加しました（ID: ${id}）。\nつづけて上の「素材の差し替え」からイラストと音源をアップロードしてください。`, "ok");
+  } catch (e) {
+    showMsg("add-msg", `失敗しました。\n${e.message}`, "err");
+  } finally {
+    $("add-btn").disabled = false;
+  }
+};
+
+// ---------- 起動 ----------
+
+(async () => {
+  if (repo && token) {
+    $("repo").value = repo;
+    $("token").value = token;
+    showMsg("setup-msg", "保存済みの設定で接続中…", "info");
+    try {
+      await connect();
+      showMsg("setup-msg", "✅ 接続済みです。", "ok");
+    } catch (e) {
+      showMsg("setup-msg", `自動接続に失敗しました。設定を確認してください。\n${e.message}`, "err");
+    }
+  }
+})();
+</script>
+</body>
+</html>
