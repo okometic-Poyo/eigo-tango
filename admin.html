@@ -39,6 +39,17 @@ a { color: #1565c0; }
 </style>
 </head>
 <body>
+<!-- ===== パスワードゲート ===== -->
+<div id="gate" style="position:fixed; inset:0; background:#f5f5f5; z-index:1000; display:flex; align-items:center; justify-content:center;">
+  <div class="card" style="width:90%; max-width:360px;">
+    <h2 style="margin-top:0">🔒 かんりページ</h2>
+    <label>パスワード</label>
+    <input type="password" id="gate-pass" inputmode="numeric" autocomplete="off">
+    <button id="gate-btn">ひらく</button>
+    <div id="gate-msg"></div>
+  </div>
+</div>
+
 <div class="wrap">
   <a class="back" href="index.html">◀ アプリにもどる</a>
   <h1>⚙️ かんりページ</h1>
@@ -72,6 +83,15 @@ a { color: #1565c0; }
     <div id="upload-msg"></div>
   </div>
 
+  <!-- ===== 回答履歴のリセット ===== -->
+  <div class="card">
+    <h2 style="margin-top:0">回答履歴のリセット</h2>
+    <p class="note" id="reset-info">読み込み中…</p>
+    <p class="note">この端末に保存されている回答履歴（マスター記録・まちがい回数）をすべて消します。単語や素材は消えません。端末ごとに履歴は別なので、消したい端末のブラウザでこのページを開いて実行してください。</p>
+    <button id="reset-btn" class="secondary">この端末の回答履歴をぜんぶリセット</button>
+    <div id="reset-msg"></div>
+  </div>
+
   <!-- ===== 単語の追加 ===== -->
   <div class="card">
     <h2 style="margin-top:0">新しい単語を追加</h2>
@@ -103,6 +123,49 @@ a { color: #1565c0; }
 
 const LS_REPO = "tango-admin-repo";
 const LS_TOKEN = "tango-admin-token";
+const PROGRESS_KEY = "tango-progress-v1"; // app.js と同じキー
+
+// ---------- パスワードゲート ----------
+// ハッシュ照合（平文をソースに残さないため）。パスワード変更時は下のハッシュを差し替える
+const GATE_HASH = "c0611aea5581c0d34b76f1bcf0bcb8742228caeb47c13974ae5b6f21bcc106e1";
+
+async function sha256hex(text) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function tryGate() {
+  const input = document.getElementById("gate-pass").value.trim();
+  if ((await sha256hex(input)) === GATE_HASH) {
+    sessionStorage.setItem("tango-gate-ok", "1"); // タブを閉じるまで有効
+    document.getElementById("gate").remove();
+  } else {
+    document.getElementById("gate-msg").innerHTML = '<div class="msg err">パスワードがちがいます。</div>';
+  }
+}
+document.getElementById("gate-btn").onclick = tryGate;
+document.getElementById("gate-pass").addEventListener("keydown", (e) => { if (e.key === "Enter") tryGate(); });
+if (sessionStorage.getItem("tango-gate-ok") === "1") document.getElementById("gate").remove();
+
+// ---------- 回答履歴のリセット ----------
+
+function describeProgress() {
+  const p = JSON.parse(localStorage.getItem(PROGRESS_KEY) || "{}");
+  const n = Object.keys(p).length;
+  document.getElementById("reset-info").textContent =
+    n ? `この端末には ${n} 語分の回答履歴があります。` : "この端末に回答履歴はありません。";
+  return n;
+}
+describeProgress();
+
+document.getElementById("reset-btn").onclick = () => {
+  const n = describeProgress();
+  if (!n) { showMsg("reset-msg", "消す履歴がありません。", "info"); return; }
+  if (!confirm(`${n} 語分の回答履歴を消します。元に戻せません。よろしいですか？`)) return;
+  localStorage.removeItem(PROGRESS_KEY);
+  describeProgress();
+  showMsg("reset-msg", "✅ リセットしました。アプリを開き直すと全セット0からになります。", "ok");
+};
 
 let repo = localStorage.getItem(LS_REPO) || "";
 let token = localStorage.getItem(LS_TOKEN) || "";

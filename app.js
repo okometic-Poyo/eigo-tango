@@ -288,8 +288,8 @@ function renderHome() {
     <div class="set-list"></div>
     <div class="home-links">
       <a class="link-btn" href="#list">📚 ことばリスト（よしゅう）</a>
-      <a class="link-btn subtle" href="admin.html">⚙️ かんりページ</a>
     </div>
+    <a class="admin-door" href="admin.html" aria-label="かんりページ">·</a>
   </div>`);
   const list = page.querySelector(".set-list");
   SETS.forEach((set, i) => {
