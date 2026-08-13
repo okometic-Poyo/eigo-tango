@@ -4,7 +4,7 @@
     { "id": "milk",     "text": "milk",     "ja": "ぎゅうにゅう", "category": "noun",          "level": "eiken-jr-gold" },
     { "id": "egg",      "text": "egg",      "ja": "たまご",       "category": "noun",          "level": "eiken-jr-gold" },
     { "id": "bread",    "text": "bread",    "ja": "パン",         "category": "noun",          "level": "eiken-jr-gold" },
-    { "id": "i",        "text": "I",        "ja": "わたし",       "category": "function-word", "level": "eiken-jr-gold" },
+    { "id": "i",        "text": "I",        "tts": "eye",         "ja": "わたし",       "category": "function-word", "level": "eiken-jr-gold" },
     { "id": "like",     "text": "like",     "ja": "〜がすき",     "category": "function-word", "level": "eiken-jr-gold" },
     { "id": "and",      "text": "and",      "ja": "〜と〜",       "category": "function-word", "level": "eiken-jr-gold" },
     { "id": "i-like-apples", "text": "I like apples.", "ja": "わたしはりんごがすき。", "category": "sentence", "level": "eiken-jr-gold" },

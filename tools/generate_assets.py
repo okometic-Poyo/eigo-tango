@@ -106,7 +106,8 @@ def main() -> None:
     missing_emoji = []
     for w in words:
         print(w["id"])
-        make_audio(w["id"], w["text"])
+        # tts フィールドがあれば読み上げにはそちらを使う（例: "I" → "eye"）
+        make_audio(w["id"], w.get("tts") or w["text"])
         if w["category"] != "function-word":
             emoji = EMOJI.get(w["id"])
             if emoji:

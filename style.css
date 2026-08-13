@@ -194,6 +194,52 @@ button { font-family: inherit; border: none; cursor: pointer; }
 }
 .next:active { transform: translateY(3px); box-shadow: 0 1px 0 #ff8f00; }
 
+/* ---------- 正解演出 ---------- */
+
+.big-maru {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 130px;
+  z-index: 100;
+  pointer-events: none;
+  animation: maru-pop 0.9s cubic-bezier(0.2, 1.6, 0.4, 1) forwards;
+  filter: drop-shadow(0 4px 10px rgba(230, 81, 0, 0.4));
+}
+@keyframes maru-pop {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  40%  { transform: translate(-50%, -50%) scale(1.25); opacity: 1; }
+  60%  { transform: translate(-50%, -50%) scale(1); }
+  80%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
+.confetti-box {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 99;
+}
+.confetti {
+  position: absolute;
+  top: -40px;
+  animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity: 0.8; }
+}
+
+/* 正解した選択肢が弾む */
+.choice.correct { animation: choice-bounce 0.5s; }
+@keyframes choice-bounce {
+  0%, 100% { transform: scale(1); }
+  30% { transform: scale(1.08); }
+  60% { transform: scale(0.97); }
+}
+
 /* ---------- 結果 ---------- */
 
 .result { text-align: center; margin-top: 8vh; }

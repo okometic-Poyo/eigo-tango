@@ -87,6 +87,54 @@ function playAudio(id) {
   else tryPlay(`content/audio/${id}.mp3`, `content/audio/${id}.m4a`);
 }
 
+// ---------- 正解演出 ----------
+
+let audioCtx = null;
+
+function playChime() {
+  // 「ピンポーン♪」をWeb Audioで生成（素材ファイル不要）
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+    [[784, 0], [1047, 0.18]].forEach(([freq, delay]) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.001, now + delay);
+      gain.gain.exponentialRampToValueAtTime(0.3, now + delay + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.5);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(now + delay);
+      osc.stop(now + delay + 0.55);
+    });
+  } catch (e) { /* 音が出なくても続行 */ }
+}
+
+function celebrate() {
+  playChime();
+  if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+
+  // 大きく弾む⭕
+  const mark = el(`<div class="big-maru">⭕</div>`);
+  document.body.appendChild(mark);
+  setTimeout(() => mark.remove(), 1000);
+
+  // 紙吹雪
+  const box = el(`<div class="confetti-box"></div>`);
+  const shapes = ["🎉", "⭐", "✨", "🌟", "💮", "🎊"];
+  for (let i = 0; i < 24; i++) {
+    const p = el(`<span class="confetti">${shapes[i % shapes.length]}</span>`);
+    p.style.left = `${Math.random() * 100}%`;
+    p.style.animationDelay = `${Math.random() * 0.4}s`;
+    p.style.animationDuration = `${1 + Math.random() * 0.8}s`;
+    p.style.fontSize = `${18 + Math.random() * 22}px`;
+    box.appendChild(p);
+  }
+  document.body.appendChild(box);
+  setTimeout(() => box.remove(), 2400);
+}
+
 // ---------- ユーティリティ ----------
 
 function shuffle(arr) {
@@ -270,41 +318,37 @@ function renderQuiz(setIndex) {
       setTimeout(() => playAudio(q.word.id), 300); // 自動再生（ブロックされたらボタンで）
     }
 
-    // --- 選択肢 ---
+    // --- 選択肢: どの形式でも「タップで選択 → きめた！で確定」 ---
     const choicesBox = page.querySelector(".choices");
     const confirmArea = page.querySelector(".confirm-area");
     let selected = null;
     let answered = false;
 
+    const confirmBtn = el(`<button class="confirm" disabled>きめた！</button>`);
+    confirmBtn.onclick = () => { if (selected && !answered) answer(selected.cw, selected.btn); };
+    confirmArea.appendChild(confirmBtn);
+
+    function select(cw, btn) {
+      if (answered) return;
+      if (q.mode.answer === "audio") playAudio(cw.id); // 音声選択肢は聞き比べできる
+      selected = { cw, btn };
+      choicesBox.querySelectorAll(".choice").forEach((b) => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      confirmBtn.disabled = false;
+    }
+
     q.choices.forEach((cw) => {
       let btn;
       if (q.mode.answer === "spell") {
         btn = el(`<button class="choice choice-spell ${cw.category === "sentence" ? "sentence" : ""}">${escapeHtml(cw.text)}</button>`);
-        btn.onclick = () => answer(cw, btn);
       } else if (q.mode.answer === "image") {
         btn = el(`<button class="choice choice-image"><img src="${imageUrl(cw)}" alt=""></button>`);
-        btn.onclick = () => answer(cw, btn);
       } else {
-        // 音声の選択肢: タップで再生＋選択 → 「きめた！」で確定
         btn = el(`<button class="choice choice-audio">🔊</button>`);
-        btn.onclick = () => {
-          if (answered) return;
-          playAudio(cw.id);
-          selected = { cw, btn };
-          choicesBox.querySelectorAll(".choice").forEach((b) => b.classList.remove("selected"));
-          btn.classList.add("selected");
-          confirmBtn.disabled = false;
-        };
       }
+      btn.onclick = () => select(cw, btn);
       choicesBox.appendChild(btn);
     });
-
-    let confirmBtn = null;
-    if (q.mode.answer === "audio") {
-      confirmBtn = el(`<button class="confirm" disabled>きめた！</button>`);
-      confirmBtn.onclick = () => { if (selected) answer(selected.cw, selected.btn); };
-      confirmArea.appendChild(confirmBtn);
-    }
 
     function answer(chosen, btn) {
       if (answered) return;
@@ -315,6 +359,7 @@ function renderQuiz(setIndex) {
         correctCount++;
         p.passed[q.mode.key] = true;
         btn.classList.add("correct");
+        celebrate();
       } else {
         p.wrong++;
         delete p.passed[q.mode.key]; // 間違えたらその方式はやり直し
@@ -332,7 +377,8 @@ function renderQuiz(setIndex) {
         <button class="next">つぎへ ▶</button>
       </div>`);
       fb.querySelector(".next").onclick = () => { qi++; showQuestion(); };
-      playAudio(q.word.id); // 正解の音を必ず聞かせて定着させる
+      // 正解の音を必ず聞かせて定着させる（正解時はチャイムの後に）
+      setTimeout(() => playAudio(q.word.id), correct ? 700 : 0);
       confirmArea.replaceChildren(fb);
       if (isMastered(q.word)) {
         fb.querySelector(".fb-mark").insertAdjacentHTML("beforeend",

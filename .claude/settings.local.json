@@ -21,7 +21,11 @@
       "Bash(xargs -r kill)",
       "Bash(git init *)",
       "Bash(git add *)",
-      "Bash(git -c user.name=aya -c user.email=aya@example.com commit -qm '初版: フラッシュカード＆小テストアプリ（サンプル3セット24語） *)"
+      "Bash(git -c user.name=aya -c user.email=aya@example.com commit -qm '初版: フラッシュカード＆小テストアプリ（サンプル3セット24語） *)",
+      "Bash(say -v Samantha -r 150 -o /tmp/tango_i.aiff \"eye\")",
+      "Bash(afconvert /tmp/tango_i.aiff -f m4af -d aac content/audio/i.m4a)",
+      "Bash(rm /tmp/tango_i.aiff)",
+      "Bash(afinfo content/audio/i.m4a)"
     ]
   }
 }
