@@ -97,6 +97,9 @@ def load_emoji_font():
 
 def make_image(word_id: str, emoji: str, font) -> None:
     out = IMAGE_DIR / f"{word_id}.png"
+    if out.exists():  # 手動で用意した画像は上書きしない
+        print(f"  image: {out.name} (既存のためスキップ)")
+        return
     canvas = Image.new("RGBA", (512, 512), BG_COLORS[hash(word_id) % len(BG_COLORS)])
 
     # 絵文字を透明キャンバスに描いてから、中央に拡大配置する（\n で複数行可）
@@ -118,6 +121,9 @@ def make_image(word_id: str, emoji: str, font) -> None:
 
 def make_audio(word_id: str, text: str) -> None:
     out = AUDIO_DIR / f"{word_id}.m4a"
+    if out.exists() or (AUDIO_DIR / f"{word_id}.mp3").exists():  # 手動音源は上書きしない
+        print(f"  audio: {word_id} (既存のためスキップ)")
+        return
     aiff = Path(f"/tmp/tango_{word_id}.aiff")
     subprocess.run(
         ["say", "-v", VOICE, "-r", RATE, "-o", str(aiff), text],
