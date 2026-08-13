@@ -346,7 +346,14 @@ function renderQuiz(setIndex) {
       } else {
         btn = el(`<button class="choice choice-audio">🔊</button>`);
       }
-      btn.onclick = () => select(cw, btn);
+      btn.onclick = () => {
+        if (answered) {
+          // 回答後: つづり・音声の選択肢はタップでその単語を読み上げ（聞き比べ・復習用）
+          if (q.mode.answer === "spell" || q.mode.answer === "audio") playAudio(cw.id);
+        } else {
+          select(cw, btn);
+        }
+      };
       choicesBox.appendChild(btn);
     });
 
@@ -371,8 +378,15 @@ function renderQuiz(setIndex) {
       }
       saveProgress();
 
-      // 機能語は日本語訳を出さない（英語→日本語変換のクセを防ぐ）
-      const showJa = q.word.ja && q.word.category !== "function-word";
+      // 音声の選択肢: 回答後はどの音がどの単語か分かるようにスペルを表示
+      if (q.mode.answer === "audio") {
+        [...choicesBox.children].forEach((b, i2) => {
+          b.insertAdjacentHTML("beforeend", `<span class="audio-label">${escapeHtml(q.choices[i2].text)}</span>`);
+        });
+      }
+
+      // 日本語訳を出さない条件: 機能語（日英変換のクセを防ぐ）／イラストが問題のとき（絵で意味が伝わるため）
+      const showJa = q.word.ja && q.word.category !== "function-word" && q.mode.prompt !== "image";
       const fb = el(`<div class="feedback ${correct ? "ok" : "ng"}">
         <div class="fb-mark">${correct ? "⭕ せいかい！" : "❌ ざんねん"}</div>
         <div class="fb-word">${escapeHtml(q.word.text)}${showJa ? `　<span class="fb-ja">${escapeHtml(q.word.ja)}</span>` : ""}</div>
