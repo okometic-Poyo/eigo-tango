@@ -358,7 +358,7 @@ function renderHome() {
     const card = el(`<button class="set-card">
       <span class="set-emoji">${set.emoji || "⭐"}</span>
       <span class="set-info">
-        <span class="set-title">セット${i + 1}　${escapeHtml(set.title)}</span>
+        <span class="set-title"><span class="set-num">${i + 1}</span>${escapeHtml(set.title)}</span>
         <span class="bar"><span class="bar-fill" style="width:${pct}%"></span></span>
         <span class="set-count">${done} / ${words.length} ことば おぼえた${done === words.length && words.length ? "🎉" : ""}</span>
       </span>
@@ -533,7 +533,7 @@ function renderList() {
   </div>`);
   const body = page.querySelector(".list-body");
   SETS.forEach((set, i) => {
-    body.appendChild(el(`<h3 class="list-set-title">${set.emoji || "⭐"} セット${i + 1}　${escapeHtml(set.title)}</h3>`));
+    body.appendChild(el(`<h3 class="list-set-title"><span class="set-num">${i + 1}</span>${set.emoji || "⭐"} ${escapeHtml(set.title)}</h3>`));
     set.words.forEach((id) => {
       const w = WORD_MAP[id];
       if (!w) return;

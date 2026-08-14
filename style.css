@@ -78,7 +78,23 @@ button { font-family: inherit; border: none; cursor: pointer; }
 
 .set-emoji { font-size: 44px; }
 .set-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-.set-title { font-size: 20px; font-weight: bold; }
+.set-title { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+
+/* ステージ番号バッジ（丸数字） */
+.set-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #ffb300;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.list-set-title .set-num { width: 24px; height: 24px; font-size: 14px; margin-right: 6px; }
 .set-count { font-size: 14px; color: #8d6e63; }
 .set-go { font-size: 24px; color: #ffb300; }
 
