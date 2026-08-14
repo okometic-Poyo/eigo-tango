@@ -28,7 +28,17 @@ button { font-family: inherit; border: none; cursor: pointer; }
   text-shadow: 2px 2px 0 #ffe0b2;
 }
 
-/* ---------- 習得率ドーナツ ---------- */
+/* ---------- 習得率ドーナツ（スクロールしても上部に固定） ---------- */
+
+.mastery-slot {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  /* 背景色で下をくぐるカードを隠す。上下に少し余白を持たせる */
+  background: #fff8e7;
+  padding: 6px 0 8px;
+  margin: -6px 0 0;
+}
 
 .mastery-card {
   display: flex;

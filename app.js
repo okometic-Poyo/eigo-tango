@@ -341,7 +341,7 @@ function renderMasteryChart() {
 
 function renderHome() {
   const page = el(`<div class="page home">
-    <h1 class="app-title">🦁 えいごの たんご</h1>
+    <h1 class="app-title">Word Adventure!</h1>
     <div class="mastery-slot"></div>
     <div class="set-list"></div>
     <div class="home-links">
