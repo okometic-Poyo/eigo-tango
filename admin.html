@@ -83,6 +83,20 @@ a { color: #1565c0; }
     <div id="upload-msg"></div>
   </div>
 
+  <!-- ===== 単語・文章の編集 ===== -->
+  <div class="card">
+    <h2 style="margin-top:0">単語・文章の編集</h2>
+    <label>編集する単語・文章を選ぶ</label>
+    <select id="edit-select"><option>（接続設定をしてください）</option></select>
+    <label>英語（表示されるテキスト）</label>
+    <input type="text" id="edit-text">
+    <label>日本語の意味</label>
+    <input type="text" id="edit-ja">
+    <p class="note">音源やイラストのファイル名（ID）は変わらないので、テキストを変えたら上の「素材の差し替え」で音源も合わせて差し替えてください。</p>
+    <button id="edit-btn" disabled>この内容に書き換える</button>
+    <div id="edit-msg"></div>
+  </div>
+
   <!-- ===== 回答履歴のリセット ===== -->
   <div class="card">
     <h2 style="margin-top:0">回答履歴のリセット</h2>
@@ -240,18 +254,61 @@ async function connect() {
   fillSetSelect();
   $("upload-btn").disabled = false;
   $("add-btn").disabled = false;
+  $("edit-btn").disabled = false;
 }
 
 function fillWordSelect() {
-  const sel = $("word-select");
-  sel.innerHTML = "";
-  wordsDoc.words.forEach((w) => {
-    const opt = document.createElement("option");
-    opt.value = w.id;
-    opt.textContent = `${w.text}（${w.ja || ""}） — ${w.id}`;
-    sel.appendChild(opt);
+  ["word-select", "edit-select"].forEach((selId) => {
+    const sel = $(selId);
+    sel.innerHTML = "";
+    wordsDoc.words.forEach((w) => {
+      const opt = document.createElement("option");
+      opt.value = w.id;
+      opt.textContent = `${w.text}（${w.ja || ""}） — ${w.id}`;
+      sel.appendChild(opt);
+    });
   });
+  loadEditFields();
 }
+
+// ---------- 単語・文章の編集 ----------
+
+function loadEditFields() {
+  const w = wordsDoc.words.find((x) => x.id === $("edit-select").value);
+  if (!w) return;
+  $("edit-text").value = w.text;
+  $("edit-ja").value = w.ja || "";
+}
+
+$("edit-select").onchange = loadEditFields;
+
+$("edit-btn").onclick = async () => {
+  const w = wordsDoc.words.find((x) => x.id === $("edit-select").value);
+  const text = $("edit-text").value.trim();
+  const ja = $("edit-ja").value.trim();
+  if (!w) return;
+  if (!text) { showMsg("edit-msg", "英語テキストを入力してください。", "err"); return; }
+  if (text === w.text && ja === (w.ja || "")) {
+    showMsg("edit-msg", "変更がありません。", "info");
+    return;
+  }
+  $("edit-btn").disabled = true;
+  showMsg("edit-msg", "保存中…", "info");
+  try {
+    const before = w.text;
+    w.text = text;
+    w.ja = ja;
+    await ghPut("content/words.json", b64encodeText(JSON.stringify(wordsDoc, null, 2)), `単語編集: ${w.id}（${before} → ${text}）`);
+    fillWordSelect();
+    $("edit-select").value = w.id;
+    loadEditFields();
+    showMsg("edit-msg", `✅ 書き換えました！\n「${before}」→「${text}」\n1分ほどでアプリに反映されます。音源が合わなくなった場合は上の「素材の差し替え」からアップロードしてください。`, "ok");
+  } catch (e) {
+    showMsg("edit-msg", `失敗しました。\n${e.message}`, "err");
+  } finally {
+    $("edit-btn").disabled = false;
+  }
+};
 
 function fillSetSelect() {
   const sel = $("new-set");
