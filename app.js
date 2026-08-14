@@ -307,14 +307,17 @@ function renderMasteryChart() {
   const pct = Math.round((counts.mastered / total) * 100);
 
   const R = 44, C = 2 * Math.PI * R; // 半径・円周
-  let offset = C * 0.25; // 12時から開始
+  // 各セグメントは自分の開始角度ぶんだけ回転させ、常にオフセット0から描く
+  // （dashoffsetで位置をずらすと開始位置が負になり欠けて描画される環境があるため）
+  let acc = 0; // ここまでの累積割合
   const rings = STAGE_META.map(({ key, color }) => {
     const frac = counts[key] / total;
-    const seg = `<circle r="${R}" cx="60" cy="60" fill="none" stroke="${color}"
-      stroke-width="16" stroke-dasharray="${Math.max(frac * C - 2, 0)} ${C}"
-      stroke-dashoffset="${offset}" transform="rotate(-90 60 60)"/>`;
-    offset -= frac * C;
-    return frac > 0 ? seg : "";
+    const angle = -90 + acc * 360; // 12時起点で時計回り
+    acc += frac;
+    if (frac <= 0) return "";
+    return `<circle r="${R}" cx="60" cy="60" fill="none" stroke="${color}"
+      stroke-width="16" stroke-dasharray="${Math.max(frac * C - 2, 0.5)} ${C}"
+      transform="rotate(${angle} 60 60)"/>`;
   }).join("");
 
   const box = el(`<div class="mastery-card">
