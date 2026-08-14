@@ -67,6 +67,14 @@ function unpassedModes(word) {
   return modesFor(word).filter((m) => !p || !p.passed[m.key]);
 }
 
+// 習得段階: mastered=おぼえた / learning=おぼえちゅう / untouched=まだといてない
+function masteryStage(word) {
+  if (isMastered(word)) return "mastered";
+  const p = progress[word.id];
+  const answered = p && (Object.keys(p.passed).length > 0 || p.wrong > 0);
+  return answered ? "learning" : "untouched";
+}
+
 // ---------- 素材のURL ----------
 
 function imageUrl(word) {
@@ -282,15 +290,63 @@ function route() {
 
 // ---------- 画面: ホーム ----------
 
+// 習得率ドーナツグラフ（SVG）。色は同一色相の濃→淡（おぼえた→まだ）で、
+// 明度単調・色覚多様性でも順序が保たれる。数値は直接ラベルで色に依存しない
+const STAGE_META = [
+  { key: "mastered",  label: "おぼえた",     color: "#e65100" },
+  { key: "learning",  label: "おぼえちゅう", color: "#ffb300" },
+  { key: "untouched", label: "まだといてない", color: "#ffe0b2" },
+];
+
+function renderMasteryChart() {
+  const counts = { mastered: 0, learning: 0, untouched: 0 };
+  const inSets = new Set(SETS.flatMap((s) => s.words));
+  WORDS.filter((w) => inSets.has(w.id)).forEach((w) => counts[masteryStage(w)]++);
+  const total = counts.mastered + counts.learning + counts.untouched;
+  if (!total) return el(`<div></div>`);
+  const pct = Math.round((counts.mastered / total) * 100);
+
+  const R = 44, C = 2 * Math.PI * R; // 半径・円周
+  let offset = C * 0.25; // 12時から開始
+  const rings = STAGE_META.map(({ key, color }) => {
+    const frac = counts[key] / total;
+    const seg = `<circle r="${R}" cx="60" cy="60" fill="none" stroke="${color}"
+      stroke-width="16" stroke-dasharray="${Math.max(frac * C - 2, 0)} ${C}"
+      stroke-dashoffset="${offset}" transform="rotate(-90 60 60)"/>`;
+    offset -= frac * C;
+    return frac > 0 ? seg : "";
+  }).join("");
+
+  const box = el(`<div class="mastery-card">
+    <svg viewBox="0 0 120 120" class="mastery-donut" role="img" aria-label="ぜんぶで${total}ことば中、おぼえたのは${counts.mastered}ことば">
+      ${rings}
+      <text x="60" y="56" text-anchor="middle" class="donut-big">${pct}%</text>
+      <text x="60" y="74" text-anchor="middle" class="donut-small">おぼえた</text>
+    </svg>
+    <div class="mastery-legend">
+      ${STAGE_META.map(({ key, label, color }) => `
+        <div class="legend-row">
+          <span class="legend-chip" style="background:${color}"></span>
+          <span class="legend-label">${label}</span>
+          <span class="legend-count">${counts[key]}</span>
+        </div>`).join("")}
+      <div class="legend-total">ぜんぶで ${total} ことば</div>
+    </div>
+  </div>`);
+  return box;
+}
+
 function renderHome() {
   const page = el(`<div class="page home">
     <h1 class="app-title">🦁 えいごの たんご</h1>
+    <div class="mastery-slot"></div>
     <div class="set-list"></div>
     <div class="home-links">
       <a class="link-btn" href="#list">📚 ことばリスト（よしゅう）</a>
     </div>
     <a class="admin-door" href="admin.html" aria-label="かんりページ">·</a>
   </div>`);
+  page.querySelector(".mastery-slot").appendChild(renderMasteryChart());
   const list = page.querySelector(".set-list");
   SETS.forEach((set, i) => {
     const words = set.words.map((id) => WORD_MAP[id]).filter(Boolean);

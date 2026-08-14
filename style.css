@@ -28,6 +28,28 @@ button { font-family: inherit; border: none; cursor: pointer; }
   text-shadow: 2px 2px 0 #ffe0b2;
 }
 
+/* ---------- 習得率ドーナツ ---------- */
+
+.mastery-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border-radius: 20px;
+  border: 3px solid #ffcc80;
+  padding: 14px 18px;
+}
+.mastery-donut { width: 130px; height: 130px; flex-shrink: 0; }
+.donut-big { font-size: 26px; font-weight: bold; fill: #e65100; font-family: inherit; }
+.donut-small { font-size: 11px; fill: #8d6e63; font-family: inherit; }
+
+.mastery-legend { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.legend-row { display: flex; align-items: center; gap: 8px; }
+.legend-chip { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+.legend-label { flex: 1; font-size: 14px; font-weight: bold; }
+.legend-count { font-size: 15px; font-weight: bold; color: #4a3b2a; }
+.legend-total { margin-top: 4px; font-size: 12px; color: #8d6e63; }
+
 .set-list { display: flex; flex-direction: column; gap: 12px; }
 
 .set-card {
